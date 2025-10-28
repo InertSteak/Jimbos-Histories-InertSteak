@@ -138,7 +138,7 @@ local mod_ace_tally = 0
 local wheel_flipped = 0
 
 for k, v in ipairs(G.playing_cards) do
-if v.ability.name ~= 'Stone Card' and (not unplayed_only or ((v.area and v.area == G.deck) or v.ability.wheel_flipped)) then 
+if not SMODS.has_no_rank(v) and (not unplayed_only or ((v.area and v.area == G.deck) or v.ability.wheel_flipped)) then 
   if v.ability.wheel_flipped and unplayed_only then wheel_flipped = wheel_flipped + 1 end
   --For the suits
   suit_tallies[v.base.suit] = (suit_tallies[v.base.suit] or 0) + 1
@@ -271,12 +271,20 @@ end
 function create_UIBox_current_hand_row_custom(handname, simple)
 local text_size = 0.4
 local num_size = 0.3
+local level = G.GAME.hands[handname].level
+local chips = G.GAME.hands[handname].chips
+local mult = G.GAME.hands[handname].mult
+if (SMODS.Mods["Talisman"] or {}).can_load then
+  level = to_number(level)
+  chips = to_number(chips)
+  mult = to_number(mult)
+end
 return (G.GAME.hands[handname].visible) and
 (not simple and
 {n=G.UIT.R, config={align = "cm", padding = 0.05, r = 0.1, colour = darken(G.C.JOKER_GREY, 0.1), emboss = 0.05, hover = true, force_focus = true}, nodes={
   {n=G.UIT.C, config={align = "cl", padding = 0.0, minw = 1.5}, nodes={
-    {n=G.UIT.C, config={align = "cm", padding = 0.01, r = 0.1, colour = G.C.HAND_LEVELS[math.min(7, G.GAME.hands[handname].level)], minw = 0.5, outline = 0.8, outline_colour = G.C.WHITE}, nodes={
-      {n=G.UIT.T, config={text = localize('k_level_prefix')..G.GAME.hands[handname].level, scale = num_size, colour = G.C.UI.TEXT_DARK}}
+    {n=G.UIT.C, config={align = "cm", padding = 0.01, r = 0.1, colour = G.C.HAND_LEVELS[math.min(7, level)], minw = 0.5, outline = 0.8, outline_colour = G.C.WHITE}, nodes={
+      {n=G.UIT.T, config={text = localize('k_level_prefix')..level, scale = num_size, colour = G.C.UI.TEXT_DARK}}
     }},
     {n=G.UIT.C, config={align = "cm", minw = 1.25, maxw = 1.25}, nodes={
       {n=G.UIT.T, config={text = ' '..localize(handname,'poker_hands'), scale = text_size, colour = G.C.UI.TEXT_LIGHT, shadow = true}}
@@ -284,13 +292,13 @@ return (G.GAME.hands[handname].visible) and
   }},
   {n=G.UIT.C, config={align = "cm", padding = 0.05, colour = G.C.BLACK,r = 0.1}, nodes={
     {n=G.UIT.C, config={align = "cr", padding = 0.01, r = 0.1, colour = G.C.CHIPS, minw = 0.5}, nodes={
-      {n=G.UIT.T, config={text = G.GAME.hands[handname].chips, scale = num_size, colour = G.C.UI.TEXT_LIGHT}},
+      {n=G.UIT.T, config={text = chips, scale = num_size, colour = G.C.UI.TEXT_LIGHT}},
       {n=G.UIT.B, config={w = 0.08, h = 0.01}}
     }},
     {n=G.UIT.T, config={text = "X", scale = num_size, colour = G.C.MULT}},
     {n=G.UIT.C, config={align = "cl", padding = 0.01, r = 0.1, colour = G.C.MULT, minw = 0.5}, nodes={
       {n=G.UIT.B, config={w = 0.08,h = 0.01}},
-      {n=G.UIT.T, config={text = G.GAME.hands[handname].mult, scale = num_size, colour = G.C.UI.TEXT_LIGHT}}
+      {n=G.UIT.T, config={text = mult, scale = num_size, colour = G.C.UI.TEXT_LIGHT}}
     }}
   }},
   {n=G.UIT.C, config={align = "cm"}, nodes={
